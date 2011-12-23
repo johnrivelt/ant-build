@@ -1,0 +1,286 @@
+<!-- included.xml -->
+<project name="model" basedir="." default="...">
+    <target name="generate-model" depends="generate-sql">
+        <echo file="${target.dir}/models/${ucName.class}.php" append="false"><![CDATA[            
+<?php
+
+/**
+ * @author ${name.author} <${email.author}>
+ * @desc ${name.company}
+ * 
+ * Date ${TODAY} ${TSTAMP}
+ */
+class ${ucName.class} extends Base${ucName.class} {
+    
+    private $_json_array = array("to_json");
+
+    public function preInsert($event) {
+        $invoker = $event->getInvoker();
+        $q = Doctrine_Query::create()
+                ->select('IFNULL(max(sortorder),0)+1 as num')
+                ->from($this->getTable()->getClassnameToReturn());
+        $rs = $q->execute()->getFirst();
+        $invoker->sortorder = $rs->num;
+        
+        foreach ($this->_json_array as $arr) {
+            if (isset($invoker->$arr))
+                $invoker->$arr = Zend_Json::encode($invoker->$arr);
+        }            
+    }
+    
+    public function preUpdate($event) {
+        $invoker = $event->getInvoker();
+        foreach ($this->_json_array as $arr) {
+            if (isset($invoker->$arr))
+                $invoker->$arr = Zend_Json::encode($invoker->$arr);
+        }        
+    }        
+
+    public function preDelete(Doctrine_Event $event) {
+        $invoker = $event->getInvoker();
+        //delete seo record
+        if(${seo.option}){
+            SeoRecord::deleteSeoByTypeAndId('${ucName.class}', $invoker->id);
+        }
+    }
+
+    public function postHydrate($event) {
+        parent::postHydrate($event);
+        $invoker = $event->data;
+
+        $array = array("to_json");
+        foreach ($array as $arr) {
+            
+            if(isset($invoker->$arr)){
+                if($invoker->$arr && $invoker->$arr != "Array"){
+                    $invoker->$arr = Zend_Json::decode($invoker->$arr);
+                }else{
+                    $invoker->$arr = array();
+                }
+            }
+            
+        }
+    }
+
+    public function setUp() {
+        parent::setUp();
+
+        $sluggable0 = new Doctrine_Template_Sluggable(array(
+                    'unique' => true,
+                    'fields' =>
+                    array(
+                        0 => 'title',
+                    ),
+                    'canUpdate' => true,
+                ));
+        $this->actAs($sluggable0);
+    }
+}
+        ]]></echo>
+        <echo file="${target.dir}/models/base/Base${ucName.class}.php" append="false"><![CDATA[                     
+<?php
+
+/**
+ * @author ${name.author} <${email.author}>
+ * @desc ${name.company}
+ * 
+ * Date ${TODAY} ${TSTAMP}
+ */
+abstract class Base${ucName.class} extends Doctrine_Record
+{
+    public function setTableDefinition()
+    {
+        $this->setTableName('${lcName.class}');
+        $this->hasColumn('id', 'integer', 4, array(
+             'type' => 'integer',
+             'fixed' => 0,
+             'unsigned' => true,
+             'primary' => true,
+             'autoincrement' => true,
+             'length' => '4',
+             ));
+        $this->hasColumn('name', 'string', 255, array(
+             'type' => 'string',
+             'fixed' => 0,
+             'unsigned' => false,
+             'primary' => false,
+             'notnull' => true,
+             'autoincrement' => false,
+             'length' => '255',
+             ));
+        $this->hasColumn('title', 'string', 255, array(
+             'type' => 'string',
+             'fixed' => 0,
+             'unsigned' => false,
+             'primary' => false,
+             'notnull' => true,
+             'autoincrement' => false,
+             'length' => '255',
+             ));        
+        $this->hasColumn('summary', 'string', 500, array(
+             'type' => 'string',
+             'fixed' => 0,
+             'unsigned' => false,
+             'primary' => false,
+             'notnull' => true,
+             'autoincrement' => false,
+             'length' => '500',
+             ));              
+        $this->hasColumn('description', 'string', null, array(
+             'type' => 'string',
+             'fixed' => 0,
+             'unsigned' => false,
+             'primary' => false,
+             'notnull' => false,
+             'autoincrement' => false,
+             'length' => '',
+             ));
+        $this->hasColumn('url', 'string', 100, array(
+             'type' => 'string',
+             'fixed' => 0,
+             'unsigned' => false,
+             'primary' => false,
+             'notnull' => true,
+             'autoincrement' => false,
+             'length' => '100',
+             ));
+        $this->hasColumn('target', 'string', 20, array(
+             'type' => 'string',
+             'fixed' => 0,
+             'unsigned' => false,
+             'primary' => false,
+             'notnull' => true,
+             'autoincrement' => false,
+             'length' => '20',
+             ));
+        $this->hasColumn('to_json', 'string', null, array(
+             'type' => 'string',
+             'fixed' => 0,
+             'unsigned' => false,
+             'primary' => false,
+             'notnull' => false,
+             'autoincrement' => false,
+             'length' => '',
+             )); 
+        $this->hasColumn('date', 'date', 25, array(
+             'type' => 'date',
+             'fixed' => 0,
+             'unsigned' => false,
+             'primary' => false,
+             'notnull' => true,
+             'autoincrement' => false,
+             'length' => '25',
+             ));             
+        $this->hasColumn('path', 'string', 100, array(
+             'type' => 'string',
+             'fixed' => 0,
+             'unsigned' => false,
+             'primary' => false,
+             'notnull' => true,
+             'autoincrement' => false,
+             'length' => '100',
+             ));
+        $this->hasColumn('banner', 'string', 255, array(
+             'type' => 'string',
+             'fixed' => 0,
+             'unsigned' => false,
+             'primary' => false,
+             'notnull' => false,
+             'autoincrement' => false,
+             'length' => '255',
+             ));
+        $this->hasColumn('alt', 'string', 255, array(
+             'type' => 'string',
+             'fixed' => 0,
+             'unsigned' => false,
+             'primary' => false,
+             'notnull' => false,
+             'autoincrement' => false,
+             'length' => '255',
+             )); 
+        $this->hasColumn('category', 'string', 255, array(
+             'type' => 'string',
+             'fixed' => 0,
+             'unsigned' => false,
+             'primary' => false,
+             'notnull' => false,
+             'autoincrement' => false,
+             'length' => '255',
+             )); 
+        $this->hasColumn('category_slug', 'string', 255, array(
+             'type' => 'string',
+             'fixed' => 0,
+             'unsigned' => false,
+             'primary' => false,
+             'notnull' => false,
+             'autoincrement' => false,
+             'length' => '255',
+             ));              
+        $this->hasColumn('is_featured', 'integer', 1, array(
+             'type' => 'integer',
+             'fixed' => 0,
+             'unsigned' => false,
+             'primary' => false,
+             'default' => '0',
+             'notnull' => true,
+             'autoincrement' => false,
+             'length' => '1',
+             ));        
+        $this->hasColumn('sortorder', 'integer', 4, array(
+             'type' => 'integer',
+             'fixed' => 0,
+             'unsigned' => false,
+             'primary' => false,
+             'notnull' => true,
+             'autoincrement' => false,
+             'length' => '4',
+             ));             
+        $this->hasColumn('searchable', 'integer', 1, array(
+             'type' => 'integer',
+             'fixed' => 0,
+             'unsigned' => false,
+             'primary' => false,
+             'default' => '1',
+             'notnull' => true,
+             'autoincrement' => false,
+             'length' => '1',
+             ));
+        $this->hasColumn('locked', 'integer', 1, array(
+             'type' => 'integer',
+             'fixed' => 0,
+             'unsigned' => false,
+             'primary' => false,
+             'notnull' => true,
+             'autoincrement' => false,
+             'length' => '1',
+             ));
+        $this->hasColumn('status', 'integer', 1, array(
+             'type' => 'integer',
+             'fixed' => 0,
+             'unsigned' => false,
+             'primary' => false,
+             'default' => '1',
+             'notnull' => true,
+             'autoincrement' => false,
+             'length' => '1',
+             ));
+        $this->hasColumn('slug', 'string', 255, array(
+             'type' => 'string',
+             'fixed' => 0,
+             'unsigned' => false,
+             'primary' => false,
+             'notnull' => false,
+             'autoincrement' => false,
+             'length' => '255',
+             ));  
+    }
+
+    public function setUp()
+    {
+        parent::setUp();
+        
+    }
+}            
+        ]]></echo>
+    </target>
+</project>

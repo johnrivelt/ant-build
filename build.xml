@@ -1,0 +1,44 @@
+<project name="moduleGenerator" basedir="." default="main">
+    
+    <import file="include/config.xml" as="config"/>
+    <!-- Check argument -->
+    <import file="${include.dir}/parse-arguments.xml" as="args"/>
+    
+    <!-- CLEAN UP-->
+    <target name="clean">
+	<!-- delete folder -->
+        <delete dir="${target.dir}"/>
+    </target>
+    
+    <!-- COPY DEFAULT BACKEND & FRONT MODULES -->
+    <!--
+    <target name="init">
+        <mkdir dir="${target.dir}"/>
+        <mkdir dir="${target.dir}/models"/>
+        <copy todir="${target.dir}"> 
+            <fileset dir="${modules.dir}/${modules.default.structure.dir}"></fileset>
+        </copy>
+    </target>
+    -->
+    
+    <!-- from project default attribute -->
+    <target name="main" depends="check
+                                ,generate-sql
+                                ,generate-model
+                                ,generate-controller
+                                ,generate-view
+                                ,generate-form
+                                ,generate-bootstrap"
+    />
+    
+   
+    <import file="${include.dir}/generate-sql.xml" as="sql"/>
+    <import file="${include.dir}/generate-model.xml" as="model"/>
+    <import file="${include.dir}/generate-controller.xml" as="controller"/>
+    <import file="${include.dir}/generate-view.xml" as="view"/>
+    <import file="${include.dir}/generate-form.xml" as="form"/>
+    <import file="${include.dir}/generate-bootstrap.xml" as="form"/>
+    
+    
+
+</project>

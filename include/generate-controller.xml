@@ -1,0 +1,244 @@
+<!-- included.xml -->
+<project name="controller" basedir="." default="...">
+    <target name="generate-controller" depends="generate-model">
+        <echo file="${target.dir}/application/modules/${lcName.class}/controllers/AdminIndexController.php" append="false"><![CDATA[      
+<?php
+/**
+ * @author ${name.author} <${email.author}>
+ * @desc ${name.company}
+ * 
+ * Date ${TODAY} ${TSTAMP}
+ */
+class ${ucName.class}_AdminIndexController extends Ongoing_Controller_Action_Admin
+{
+
+    public function init()
+    {
+        parent::init();
+        $this->_modelClass = '${ucName.class}';
+        //$this->_modelSlug = Doctrine_Inflector::urlize($this->_modelClass);
+        $this->_modelSlug = '${slugName.class}';
+
+        $this->view->titleIcon = 'book_32.png';
+    }
+
+    /**
+     * Index page action
+     */
+    public function indexAction()
+    {
+        $this->view->title = "Manage {$this->_modelClass}s";
+        $this->view->backLink = '/admin';
+    }
+    
+   /**
+     * Retrieve section specific datagirid object
+     * @return Ongoing_View_Helper_Datagrid
+     */
+    public function getDatagrid()
+    {
+        $category = $this->_getParam('type', 'all');
+
+        $grid = new Ongoing_View_Helper_Datagrid();
+        $grid->setOptions(array(
+            'title' => "{$this->_modelClass}",
+            'module' => $this->_modelSlug,
+            'edit' => true,
+            'delete' => true,
+            'add' => true,
+            'sort' => true,
+            'status' => true
+        ));
+        $grid->setColumns(array(
+            'title' => array('name' => 'title', 'label' => 'Title', 'index' => 'title', 'jsonmap' => "title", 'width' => '238'),
+            'is_featured' => array('name' => 'is_featured', 'label' => 'is_featured', 'index' => 'is_featured', 'jsonmap' => "is_featured", 'width' => '238'),
+            'slug' => array('name' => 'slug', 'label' => 'Page URL', 'index' => 'slug', 'jsonmap' => 'slug', 'width' => '170'),
+            'searchable' => array('name' => 'searchable', 'label' => 'Display on Subnavigation', 'index' => 'searchable', 'jsonmap' => 'searchable', 'width' => '180')
+        ));
+        $grid->addEditColumn('title');
+
+        return $grid;
+    }
+
+    /**
+     * Retrieve section specific form
+     */
+    public function getForm()
+    {
+        $formName = "{$this->_modelClass}_Form_Admin";
+        return new $formName();
+    }
+
+    public function preProcess($data)
+    {
+        //$data['json'] = Zend_Json::encode($data['to_json']);
+        return $data;
+    }
+
+    public function prePopulateProcess($data)
+    {
+        //$d = explode("-", $data['date']); //y-m-d
+        //$data['date'] = date("m/d/Y", strtotime($data['date']));
+        return $data;
+    }
+
+    /**
+     * JSON grid data
+     */
+    public function gridAction()
+    {
+        // Get request parameters
+
+
+        $page = $_GET['page']; // get the requested page
+        $limit = $_GET['rows']; // get how many rows we want to have into the grid
+        $sidx = $_GET['sidx']; // get index row - i.e. user click to sort
+        $sord = $_GET['sord']; // get the direction
+        if (!$sidx)
+            $sidx = 1;
+
+        //$category_slug = $this->_getParam('category_slug', key(Program::getCategoryOptions()));
+        $keyword = $_GET['keyword'];            
+
+            // Doctrine paging - TODO - abstract to model
+            // Defining initial variables
+
+        // Doctrine paging - TODO - abstract to model
+        // Defining initial variables
+        $currentPage = $page;
+        $resultsPerPage = $limit;
+
+        $q = Doctrine_Query::create()
+                    ->from($this->_modelClass)
+                    ->orderby("$sidx $sord");
+        //if($type != "all") $q->addWhere('type = ?',$type);
+        if($keyword) $q->addWhere ("title like '%{$keyword}%'");                
+        
+        // Creating pager object
+        $pager = new Doctrine_Pager(
+                        $q,
+                        $currentPage, // Current page of request
+                        $resultsPerPage // (Optional) Number of results per page. Default is 25
+        );
+
+        $items = $pager->execute();
+        // Setup JSON array
+        $json = array();
+
+
+        $json['page'] = $pager->getPage();
+        $json['total'] = $pager->getLastPage();
+        $json['records'] = $pager->getNumResults();
+
+        $grid = $this->getDatagrid();
+
+        foreach ($items as $item) {
+            $item->is_featured = ($item->is_featured) ? '<img src="/css/admin/skin/images/icon/accept.png" />' : '<img src="/css/admin/skin/images/icon/accept-disabled.png" />';
+            $json['rows'][] = $grid->formatRow($item);
+        }
+
+
+        // Return response
+        //echo Zend_Json::encode($json);
+        $this->_helper->json($json);
+    }
+
+    public function addAction()
+    {
+        $this->view->title = "Add {$this->_modelClass}";
+        $this->view->backLink = "/admin/{$this->_modelSlug}";
+
+        $form = $this->getForm();
+        $request = $this->getRequest();
+        
+        $this->view->content = $form;
+
+        // Check if we have a POST request
+        if (!$request->isPost()) {
+            return $this->render('admin/blank', null, true);
+        }
+
+        // Get our form and validate it
+        if (!$form->isValid($request->getPost())) {
+            $this->view->priorityMessenger('Please fix the errors below', 'error');
+            return $this->render('admin/blank', null, true); // re-render the login form
+        }
+
+        $model = new $this->_modelClass();
+
+        $model->fromArray($this->preProcess($form->getValues()));
+        $model->save();
+        
+        if(${tag.option}){//save tag
+            Tag::_process($tags_string, '${ucName.class}', $model->id);
+        }
+
+        if(${seo.option}){//save seo
+            SeoRecord::saveSeo('${ucName.class}', $model->id, $values['seo']);        
+        }
+
+        $this->view->priorityMessenger('Item added', 'success');
+        $this->_helper->redirector('index', 'index', $this->_modelSlug, array('admin' => 'admin', 
+            //'category' => $model->category_slug
+            ));
+    }
+
+    public function modifyAction()
+    {
+        $this->view->title = "Modify {$this->_modelClass}";
+        $this->view->backLink = "/admin/{$this->_modelSlug}";
+
+        $form = $this->getForm();
+        $request = $this->getRequest();
+        $id = $request->getParam('id');
+
+        $model = Doctrine::getTable($this->_modelClass)->find($id);
+        
+        // Check if we have a POST request
+        if (!$request->isPost()) {
+            $data = $model->toArray();
+            if(${seo.option}){//save seo
+                $seo = SeoRecord::findOneSeoByTypeAndId('${ucName.class}', $model->id);
+                if ($seo)
+                    $data['seo'] = $seo->toArray();
+            }
+
+            //$data['to_json'] = Zend_Json::decode($data['to_json']);
+            $form->populate($this->prePopulateProcess($data));
+            
+            $this->view->content = $form;
+            
+            return $this->render('admin/blank', null, true);
+        }
+
+        // Get our form and validate it
+        if (!$form->isValid($request->getPost())) {
+            $this->view->priorityMessenger('Please fix the errors below', 'error');
+            return $this->render('admin/blank', null, true); // re-render the form
+        }
+
+        $model->fromArray($this->preProcess($form->getValues()));
+        $model->save();
+        
+
+        if(${tag.option}){//save tag
+            Tag::_process($tags_string, '${ucName.class}', $model->id);
+        }
+
+        if(${seo.option}){//save seo
+            SeoRecord::saveSeo('${ucName.class}', $model->id, $values['seo']);        
+        }        
+
+        // We're authenticated! Redirect to the home page
+        $this->view->priorityMessenger('Item updated', 'success');
+        $this->_helper->redirector('index', 'index', '${slugName.class}', array('admin' => 'admin', 
+            //'category' => $model->category_slug
+            ));
+    }
+
+}        
+        
+        ]]></echo>
+        
+    </target>
+</project>

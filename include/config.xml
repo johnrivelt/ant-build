@@ -1,0 +1,20 @@
+<!-- included.xml -->
+<project name="config" basedir="." default="...">
+    <!-- DECLARE COMMENT VAR -->
+    <property name="name.application"  value="default application"/>
+    <property name="name.author"  value="John,Cho"/>
+    <property name="email.author"  value="john@brownpaperbag.co.nz"/>    
+    <property name="name.company"  value="brownpaperbag.co.nz"/>    
+    
+    <!-- DECLARE FOLDER ENV -->
+    <property name="src.dir"  value="src"/>
+    <property name="include.dir"  value="include"/>
+    <property name="target.dir"  value="temp"/>
+    <property name="modules.dir"  value="modules"/>
+    
+    <property name="modules.default.structure.dir"  value="default_folder_structure"/>
+    
+    <!-- DECLARE OPTION -->
+    <property name="seo.option"  value="false"/>
+    <property name="tag.option"  value="false"/>    
+</project>

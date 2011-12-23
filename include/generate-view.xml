@@ -1,0 +1,112 @@
+<!-- included.xml -->
+<project name="view" basedir="." default="...">
+    <target name="generate-view" depends="generate-controller">
+        
+        <echo file="${target.dir}/application/modules/${lcName.class}/views/scripts/admin-index/index.phtml" append="false"><![CDATA[      
+<?php $module = "${slugName.class}"; ?>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#toolbarSearch").keyup(function(){
+            //toolbarSelectGridUpdate(this,'dataGrid');
+            toolbarKeywordSearch(this,'dataGrid');
+        });
+					
+    
+		
+ 
+        var lastSel;
+        jQuery("#dataGrid").jqGrid({ 
+            url:"/admin/<?php echo $module?>/index/grid", 
+            datatype: "json",
+            'class': 'cms-table',
+            colNames:["Title","","","",""], 
+            colModel: [
+                {"name":"title","label":"Title","index":"title","jsonmap":"title","width":"560"},
+                {"name":"is_featured","label":"","index":"","jsonmap":"is_featured","width":16,"sortable":false,"align":"right","resizable":false,"formatter":"gridUpdate","formatoptions":{"baseLinkUrl":"\/admin\/<?php echo $module?>\/index\/featured\/","title":"Is this item featured?"}},
+                {"name":"status","label":"","index":"","jsonmap":"status","width":16,"sortable":false,"align":"right","resizable":false,"formatter":"gridUpdate","formatoptions":{"baseLinkUrl":"\/admin\/<?php echo $module?>\/index\/status\/","title":"Toggle visibility"}},
+                {"name":"edit","label":"","index":"","jsonmap":"edit","width":16,"sortable":false,"align":"right","formatter":"showlink","formatoptions":{"baseLinkUrl":"\/admin\/<?php echo $module?>\/index\/modify\/","title":"Modify this item","classes":"test123","rel":"dataGrid"},"resizable":false},
+                {"name":"delete","label":"","index":"","jsonmap":"delete","width":16,"sortable":false,"align":"right","resizable":false,"formatter":"deleteGrid","formatoptions":{"baseLinkUrl":"\/admin\/<?php echo $module?>\/index\/delete","title":"Delete this item"}}], 
+            sortname: 'sortorder',
+            sortorder: 'asc',
+            rowNum:20,
+            rowList:[10,20,30,50],
+            altRows: true,
+            altclass: 'odd',
+            pager: '#dataGrid_pager',
+            pginput: false,
+            viewrecords: true,  
+            //caption:"JSON Example",
+            width: '738',
+            height: '100%',
+            cellLayout: '20',
+            shrinkToFit: false,
+            pagerpos: 'left',
+            jsonReader: { 
+                repeatitems : false, 
+                id: "id" 
+            },
+            loadComplete: function() {
+				
+                $('.ui-jqgrid-bdiv a.tooltip').tooltip({ 
+                    track: true, 
+                    delay: 0, 
+                    showURL: false, 
+                    showBody: " - ", 
+                    fade: 250 
+                });
+				
+            }
+        }).navGrid("#dataGrid_pager",{edit:false,add:false,del:false,search:false,refresh:false});		
+		
+        $("a.remove").click(function(){
+            ajaxDelete($(this).attr('href'),'dataGrid');
+            return false;
+        });
+                        
+
+        $('#dataGrid').jqGrid('sortableRows', {
+            update: function(event, ui){
+                // Display loading message
+                $('.loading').css('display', 'block');
+                var url = '/admin/<?php echo $module?>/index/sort';
+                var params = $('#dataGrid').getGridParam('postData');
+				
+                params.ids = $('#dataGrid').jqGrid('getDataIDs'); 
+                                
+                params.item = ui.item.context.id;
+                params.target = event.target.id;                                
+                                
+                // Load request url
+                $.get(
+                url,
+                params,
+                function(json){
+                    // Reload grid
+                    $('#dataGrid').trigger('reloadGrid');
+                                                
+                    // Clear any current messages
+                    $('.cms-ui-message').remove();
+                    $('.content').prepend('<p class="cms-ui-message cms-ui-message-closable cms-ui-' + json.status + '-message">' + json.message + '<span>X</span></p>');    
+                                                
+                },
+                'json'
+            )
+				
+            }
+        });                               
+                            
+    });
+</script>
+<div class="toolbar buttons">
+    <input class="cms-ui-grid-toolbar-search cms-ui-input-titlelabel" id="toolbarSearch" placeholder="Keyword search..">
+    <?php //echo $this->formSelect('category_slug',$this->category_slug,array('class'=> 'gridUpdate', 'rel' => 'dataGrid'),${ucName.class}::getCategoryOptions()); ?>
+</div>
+<p class="page-description"/></p>
+<div class="ui-jqgrid-container">
+    <a class="ui-jqgrid-add tooltip" href="/admin/<?php echo $module?>/index/add" rel="dataGrid" title="Add new item">Add new item<img src="/css/admin/skin/images/icon/new.png" alt="Add new item"></a>
+    <table id="dataGrid" class="cms-table"></table>
+    <div id="dataGrid_pager"></div>
+</div>                       
+        ]]></echo>        
+    </target>         
+</project>

@@ -1,0 +1,49 @@
+:: domain
+Blog {Comments} => Grafton, Goodepr FRONT AJAX DELETE
+
+
+News - Heirloom
+Slideshow - Heirloom
+Article = Template => Breakers
+
+Page Breakers
+Banner - Breakers
+
+Cart + Product + Transaction + Freight => Heirloom
+
+Product - Heirloom
+
+Coupon - Snatchadeal
+
+
+Member - Heirloom
+User - Heirloom
+Region - ABC
+Gallery - breakers
+People - Grafton
+Testimonial - ABC
+
+FAQ => Heirloom + breakers (Category built-in)
+Callendar => ong_breakers
+
+
+::functional
+Categories => need new (before use Heirloom)
+Emails - need 
+Visitors
+Settings
+Tokens
+Tag
+Seo
+Stats => need ABC
+
+Import module => Fishcity
+
+
+::Default
+public
+-js
+-img
+-css
+-thumb
+-upload

@@ -1,0 +1,66 @@
+<!-- included.xml -->
+<project name="args" basedir="." default="...">
+    
+    <condition property="params.set">
+        <and>
+            <isset property="table"/>
+            <!--
+            <isset property="lc"/>
+            <isset property="slug"/>
+            -->
+        </and>
+    </condition>
+    
+    <target name="check">
+        <fail unless="params.set">
+        Must specify the parameters: table name
+        Example : ant main -Dtable=product_size 
+        </fail>
+        
+        <!-- Using Javascript functions to convert the string -->
+        <script language="javascript"> <![CDATA[
+            
+	function trim(str){
+            var str = new String(str);
+            return str.replace(/^\s+|\s+$/g, '');
+	}
+
+        function convertTableNametoSlug(str){
+            var str = new String(str);
+            str = trim(str);
+            str = str.replace("_", "-");
+            return str;
+        }
+
+        function convertTableNametoUcword(str){
+            var str = new String(str);
+            str = trim(str);
+
+            var arr = str.split("_");
+            for(var item in arr){
+                var str = arr[item];
+                var f = str.charAt(0).toUpperCase();
+                arr[item] = f + str.substr(1);        	
+            }
+            return arr.join('');
+        }	    	
+    
+        var tablename = project.getProperty("table");
+	var slug = convertTableNametoSlug(tablename);
+	var ucword = convertTableNametoUcword(tablename);	        
+            
+            // store the result in a new property
+            
+        project.setProperty("uc", ucword);
+        project.setProperty("slug",slug);
+        project.setProperty("lc", tablename);
+
+        ]]> </script>        
+        
+        <property name="ucName.class"  value="${uc}"/>    
+        <property name="slugName.class"  value="${slug}"/>
+        <property name="lcName.class"  value="${lc}"/>        
+        
+    </target>       
+  
+</project>

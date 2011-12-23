@@ -1,0 +1,37 @@
+<!-- included.xml -->
+<project name="sql" basedir="." default="...">
+    <target name="generate-sql">
+        <echo file="${target.dir}/schema.sql" append="true"><![CDATA[
+/*   ${ucName.class} SQL START -- Date ${TODAY} ${TSTAMP} */            
+DROP TABLE IF EXISTS `${lcName.class}`;
+CREATE TABLE `${lcName.class}` (
+        `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+        `name` VARCHAR(255) NOT NULL,
+        `title` VARCHAR(255) NOT NULL,
+        `summary` VARCHAR(500) NOT NULL,        
+        `description` TEXT NULL,
+        `url` VARCHAR(100) NOT NULL,
+        `target` VARCHAR(20) NOT NULL,
+        `to_json` TEXT NULL,
+	`date` DATE NULL,        
+        `path` VARCHAR(100) NOT NULL,
+        `banner` VARCHAR(255) NULL DEFAULT NULL,        
+        `alt` VARCHAR(255) NULL DEFAULT NULL,
+        `category` VARCHAR(255) NULL,
+	`category_slug` VARCHAR(255) NULL,        
+	`is_featured` TINYINT(1) NOT NULL DEFAULT '0',        
+        `sortorder` INT(11) NOT NULL,
+        `searchable` TINYINT(1) NOT NULL DEFAULT '1',
+        `locked` TINYINT(1) NOT NULL,
+        `status` TINYINT(1) NOT NULL DEFAULT '1',
+        `slug` VARCHAR(255) NULL DEFAULT NULL,
+        PRIMARY KEY (`id`)
+)
+COLLATE='utf8_general_ci'
+ENGINE=InnoDB
+ROW_FORMAT=DEFAULT;        
+/*  ${ucName.class} SQL END */            
+        ]]></echo>        
+    </target>       
+  
+</project>

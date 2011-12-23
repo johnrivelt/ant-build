@@ -1,0 +1,18 @@
+<!-- included.xml -->
+<project name="bootstrap" basedir="." default="...">
+    <target name="generate-bootstrap" depends="generate-form">
+        <echo file="${target.dir}/application/modules/${lcName.class}/Boostrap.php" append="false"><![CDATA[      
+<?php
+
+/**
+ * @author ${name.author} <${email.author}>
+ * @desc ${name.company}
+ * 
+ * Date ${TODAY} ${TSTAMP}
+ */
+
+class ${ucName.class}_Bootstrap extends Zend_Application_Module_Bootstrap {}
+        ]]></echo>        
+    </target>                
+    
+</project>

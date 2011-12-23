@@ -1,0 +1,196 @@
+<!-- included.xml -->
+<project name="form" basedir="." default="...">
+    
+    <target name="generate-form" depends="generate-view">
+        <echo file="${target.dir}/application/modules/${lcName.class}/forms/Admin.php" append="false"><![CDATA[      
+<?php
+
+/**
+ * @author ${name.author} <${email.author}>
+ * @desc ${name.company}
+ * 
+ * Date ${TODAY} ${TSTAMP}
+ */
+class ${ucName.class}_Form_Admin extends Ongoing_Form_AdminForm
+{
+
+    public function init()
+    {
+        parent::init();
+        $this->setAction('');
+        $this->setAttrib('class', 'editor-form');
+        $this->setAttrib('enctype', 'multipart/form-data');
+
+        $this->setDecorators(array(
+            'FormElements',
+            'Form'
+        ));
+        
+        $name = $this->addElement('text', 'name', array(
+                    'filters' => array('StringTrim'),
+                    'validators' => array(
+                        array('StringLength', false, array(1, 50)),
+                    ),
+                    'required' => true,
+                    'label' => '${ucName.class} Name',
+                    'class' => 'text-large',
+                    'description' => 'Display name on CMS page'
+                ));
+        
+        $title = $this->addElement('text', 'title', array(
+                    'filters' => array('StringTrim'),
+                    'validators' => array(
+                        array('StringLength', false, array(1, 50)),
+                    ),
+                    'required' => true,
+                    'label' => '${ucName.class} Title',
+                    'class' => 'text-large',
+                    //'description' => 'display title on front webpage'
+                ));       
+        
+
+        $description = $this->addElement('text', 'description', array(
+                    'filters' => array('StringTrim'),
+                    'required' => false,
+                    'label' => 'Sub Title',
+                    'class' => 'text-large',
+                    //'class' => 'textarea-noeditor',
+                    'cols' => 66,
+                    'rows' => 5
+                ));
+        $url = $this->addElement('text', 'url', array(
+                    'filters' => array('StringTrim'),
+                    'validators' => array(
+                        array('StringLength', false, array(1, 128)),
+                    ),
+                    'required' => false,
+                    'label' => 'Link URL',
+                    'class' => 'text-large',
+                    'description' => 'May be left blank for no link.'
+                ));       
+            $target = $this->addElement('select', 'target', array(
+                    'label' => 'Target Type',
+                    'required' => true,
+                    'class' => 'select',
+                    //'separator' => '&nbsp;&nbsp;&nbsp;&nbsp;'
+                    'multioptions' => array(
+                        "_blank" => "new window", 
+                        "_self" => "same window"
+                        ),
+                ));        
+        
+        
+/*        $this->addElement('MultiFileBrowse', 'page_images', array(
+            'filters' => array('StringTrim'),
+            'required' => false,
+            'label' => 'Slideshow or Images',
+                //'class' => 'cms-ui-multifilemanagerselect'
+                'description' => 'Image should be PNG or JPG format.'
+        ));*/
+
+/*        $this->addDisplayGroup(
+                array(
+            'page_images'
+                ), 'images', array(
+            "legend" => "Images"
+                )
+        );  */      
+        
+        $banner= $this->addElement('fileBrowseReplace', 'banner', array(
+                    'label' => 'Image',
+                    'required' => true,
+                    'description' => 'Image should be JPG, PNG or GIF format. sized 950px width and 429px height.'
+                ));
+        $alt = $this->addElement('text', 'alt', array(
+                    'filters' => array('StringTrim'),
+                    'validators' => array(
+                        array('StringLength', false, array(1, 50)),
+                    ),
+                    'required' => true,
+                    'label' => 'Image Alt',
+                    'class' => 'text-large'
+                ));            
+        
+/*        $banner = $this->addElement('MultiFileBrowse', 'banner', array(
+                    'filters' => array('StringTrim'),
+                    'label' => '${ucName.class} Image',
+                    'required' => true,
+                    'description'  => 'Image should be JPG, PNG or GIF format. sized 639px width and 244px height.'
+                ));        */    
+        
+/*        $banner = $this->addElement('imageToggle', 'banner', array(
+                    'label' => '${ucName.class} Image',
+                    'validators' => array(
+                        array('Count', false, 1),
+                        array('Extension', false, 'jpg,png,gif')
+                    ),
+                    'destination' => APPLICATION_PATH . '/../public/upload/temp',
+                    'previewPath' => '/upload/${slugName.class}/',
+                    'description' => 'Slideshow image. Image should be JPG, PNG or GIF format, and sized 517px width and 329px height.',
+                    'required' => false
+                ));
+
+        $banner_existing = $this->addElement('hidden', 'banner_existing', array(
+                    'decorators' => array(
+                        'ViewHelper',
+                    ),
+                ));*/
+        
+        
+        
+/*        $slideshow2 = $this->addElement('imageToggle', 'slideshow2', array(
+                    'label' => 'Slideshow Image',
+                    'validators' => array(
+                        array('Count', false, 1),
+                        array('Extension', false, 'jpg,png,gif')
+                    ),
+                    'destination' => APPLICATION_PATH . '/../upload/temp',
+                    'previewPath' => '/upload/${slugName.class}/',
+                    'description' => 'slideshow2 image. Image should be JPG, PNG or GIF format, and sized 517px width and 329px height.',
+                    'required' => false
+                ));
+
+        $slideshow2_existing = $this->addElement('hidden', 'slideshow2_existing', array(
+                    'decorators' => array(
+                        'ViewHelper',
+                    ),
+                ));*/
+        
+        $this->addDisplayGroup(
+                array(
+            'name',
+            'title', 
+            'description',
+            'banner',                    
+            'alt',
+            'url',
+            'target'
+            //'description',
+            //'page_images'
+                ), 'general', array(
+            "legend" => "General"
+                )
+        );        
+        
+
+
+        $submit = $this->addElement('submit', 'submit', array(
+                    'required' => false,
+                    'ignore' => true,
+                    'label' => 'Save',
+                    'class' => 'submit ongoingButton',
+                    'description' => 'or <a href="/admin/${slugName.class}">cancel</a>',
+                    'decorators' => array(
+                        'ViewHelper',
+                        array('Description', array('escape' => false)),
+                        array('HtmlTag', array('tag' => 'div', 'class' => 'submit-button')),
+                    )
+                ));
+
+        $this->postInit();
+    }
+
+}        
+        ]]></echo>        
+    </target>     
+</project>
